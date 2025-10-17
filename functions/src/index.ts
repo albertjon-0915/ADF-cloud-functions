@@ -64,7 +64,7 @@ export const createDbDocument = onRequest(async (req, res) => {
       time: formattedTime,
       food_amount: foodAmount,
     };
-    const result = await db.collection("feed_logs").add({newDocument});
+    const result = await db.collection("feed_logs").add(newDocument);
     res.send("Document added: " + JSON.stringify(result));
   } catch (error) {
     res.send("Failed to add document: " + error);
