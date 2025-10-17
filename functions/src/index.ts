@@ -10,6 +10,11 @@
 import {setGlobalOptions} from "firebase-functions";
 import {onRequest} from "firebase-functions/https";
 import * as logger from "firebase-functions/logger";
+import * as admin from "firebase-admin";
+
+admin.initializeApp();
+const db = admin.firestore();
+const rtdb = admin.database();
 
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
@@ -24,9 +29,44 @@ import * as logger from "firebase-functions/logger";
 // functions should each use functions.runWith({ maxInstances: 10 }) instead.
 // In the v1 API, each function can only serve one request per container, so
 // this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+setGlobalOptions({maxInstances: 10});
 
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+export const helloWorld = onRequest((request, response) => {
+  logger.info("Hello logs!", {structuredData: true});
+  response.send("Hello from Firebase!");
+});
+
+export const createDbDocument = onRequest(async (req, res) => {
+  try {
+    const snapshot = await rtdb.ref("/feeder_status/food_amount").once("value");
+    const foodAmount = snapshot.val();
+
+    if (!foodAmount) {
+      res.send("Failed to retrieve food amount");
+      return;
+    }
+
+    const now = new Date();
+    const formattedDate = new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    }).format(now);
+
+    const formattedTime = new Intl.DateTimeFormat("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }).format(now);
+
+    const newDocument = {
+      date: formattedDate,
+      time: formattedTime,
+      food_amount: foodAmount,
+    };
+    const result = await db.collection("feed_logs").add({newDocument});
+    res.send("Document added: " + JSON.stringify(result));
+  } catch (error) {
+    res.send("Failed to add document: " + error);
+  }
+});
