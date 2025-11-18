@@ -47,13 +47,15 @@ export const createDbDocument = onRequest(async (req, res) => {
     }
 
     const now = new Date();
-    const formattedDate = new Intl.DateTimeFormat("en-US", {
+    const formattedDate = new Intl.DateTimeFormat("en-PH", {
+      timeZone: "Asia/Manila",
       month: "short",
       day: "2-digit",
       year: "numeric",
     }).format(now);
 
-    const formattedTime = new Intl.DateTimeFormat("en-US", {
+    const formattedTime = new Intl.DateTimeFormat("en-PH", {
+      timeZone: "Asia/Manila",
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
@@ -64,6 +66,7 @@ export const createDbDocument = onRequest(async (req, res) => {
       time: formattedTime,
       food_amount: foodAmount,
     };
+
     const result = await db.collection("feed_logs").add(newDocument);
     res.send("Document added: " + JSON.stringify(result));
   } catch (error) {
