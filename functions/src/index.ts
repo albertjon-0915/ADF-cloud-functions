@@ -11,6 +11,7 @@ import {setGlobalOptions} from "firebase-functions";
 import {onRequest} from "firebase-functions/https";
 import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -65,6 +66,7 @@ export const createDbDocument = onRequest(async (req, res) => {
       date: formattedDate,
       time: formattedTime,
       food_amount: foodAmount,
+      created_at: FieldValue.serverTimestamp()
     };
 
     const result = await db.collection("feed_logs").add(newDocument);
